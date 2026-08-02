@@ -118,6 +118,3 @@ See `.env.example` for the full list. Key variables:
 - Cloud storage (S3) instead of local disk for uploaded files
 - Automated test suite (pytest)
 
-## License
-
-MIT
