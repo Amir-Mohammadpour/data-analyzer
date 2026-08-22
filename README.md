@@ -12,6 +12,7 @@ Upload a dataset → the API profiles it with Pandas → ask questions in plain 
 - **Conversation history** — every question and answer is stored per dataset
 - **Async throughout** — FastAPI + async SQLAlchemy + asyncpg for non-blocking I/O
 - **Dockerized** — full stack (API + PostgreSQL) runs with one command
+- **Tested** — pytest suite covering auth, uploads, and AI-driven Q&A (with the AI call mocked)
 
 ## Tech Stack
 
@@ -24,6 +25,7 @@ Upload a dataset → the API profiles it with Pandas → ask questions in plain 
 | Auth | JWT (python-jose) + passlib/bcrypt |
 | Data processing | Pandas |
 | AI | OpenAI-compatible API (works with OpenAI, etc.) |
+| Testing | pytest + pytest-asyncio + httpx |
 | Containerization | Docker + Docker Compose |
 
 ## Project Structure
@@ -39,6 +41,7 @@ app/
 ├── services/                  # File handling, Pandas profiling, AI calls
 └── routers/                    # API endpoints
 alembic/                          # Database migrations
+tests/                              # pytest suite (auth, upload, analyze)
 Dockerfile
 docker-compose.yml
 ```
@@ -53,7 +56,7 @@ docker-compose.yml
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/<Amir-Mohammadpour>/data-analyzer.git
+   git clone https://github.com/Amir-Mohammadpour/data-analyzer.git
    cd data-analyzer
    ```
 
@@ -85,6 +88,20 @@ uvicorn app.main:app --reload
 ```
 (Requires a local PostgreSQL instance and a matching `DATABASE_URL` in `.env`.)
 
+## Running Tests
+
+The test suite uses an in-memory SQLite database and mocks the AI provider, so it runs fully offline — no real database or API key needed.
+
+```bash
+pip install -r requirements.txt
+pytest -v
+```
+
+This covers:
+- **Auth** — registration, duplicate emails, login success/failure, password validation
+- **Upload** — authentication requirement, file type validation, CSV processing, listing
+- **Analyze** — asking questions, handling not-ready/nonexistent datasets, conversation history
+
 ## API Endpoints
 
 | Method | Endpoint | Description |
@@ -110,11 +127,10 @@ See `.env.example` for the full list. Key variables:
 | `SECRET_KEY` | Secret used to sign JWTs |
 | `OPENAI_API_KEY` | API key for the LLM provider |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | JWT expiration time |
+| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | Credentials used to provision the PostgreSQL container |
 
 ## Possible Future Improvements
 
 - Refresh tokens (currently access-token-only by design, for simplicity)
 - Rate limiting on the login endpoint
 - Cloud storage (S3) instead of local disk for uploaded files
-- Automated test suite (pytest)
-
